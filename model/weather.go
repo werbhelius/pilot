@@ -16,12 +16,12 @@ type Temperature struct {
 	Humidity     int      //%
 	Sunrise      time.Time
 	Sunset       time.Time
-	VisibilityM  float32 // m
+	VisibilityM  int     // m
 	WindspeedMps float32 // m/s
-	WindDegDesc  string
+	WindDegDesc  float32
 	RainOneHour  float32 // mm
 	SnowOneHour  float32 // mm
-	Cloudiness   string
+	Cloudiness   int
 }
 
 type Day struct {
@@ -30,8 +30,8 @@ type Day struct {
 }
 
 type Coord struct {
-	Lat float32
-	Lon float32
+	Lat float32 `json:"lat"`
+	Lon float32 `json:"lon"`
 }
 
 type Weather struct {
@@ -45,4 +45,10 @@ type UnitTemp float32
 
 func (ut UnitTemp) FormatTemp() string {
 	return fmt.Sprintf("%v°C", ut)
+}
+
+type UnitWindDeg string
+
+func (uw UnitWindDeg) FormatWindDeg() {
+
 }
