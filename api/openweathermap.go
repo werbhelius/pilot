@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -31,8 +32,8 @@ type currentWeather struct {
 	} `json:"weather"`
 	Main struct {
 		Temp     float32 `json:"temp"`
-		Pressure int     `json:"pressure"`
-		Humidity int     `json:"humidity"`
+		Pressure float32 `json:"pressure"`
+		Humidity float32 `json:"humidity"`
 		TempMin  float32 `json:"temp_min"`
 		TempMax  float32 `json:"temp_max"`
 	} `json:"main"`
@@ -61,39 +62,48 @@ type currentWeather struct {
 	Cod  int    `json:"cod"`
 }
 
+type forecast struct {
+	List []currentWeather `json:"list"`
+}
+
 const (
 	CITY_API     = "https://raw.githubusercontent.com/werbhelius/Data/master/cityIdwithCoord.json"
 	CURRENT_API  = "http://api.openweathermap.org/data/2.5/weather?id=%d&appid=57eeedbb8f9a8f7627af398802d741b0&units=metric&lang=%s"
 	FORECAST_API = "http://api.openweathermap.org/data/2.5/forecast?id=%d&appid=57eeedbb8f9a8f7627af398802d741b0&units=metric&lang=%s"
 )
 
-func RequestCityId(cityName string) (int, error) {
+func requestCityId(cityName string) model.Location {
 	res, requestErr := http.Get(CITY_API)
 	if requestErr != nil {
-		return -1, fmt.Errorf("Unable to get city list")
+		log.Fatalf("Unable to get city list")
 	}
 	defer res.Body.Close()
 	body, bodyErr := ioutil.ReadAll(res.Body)
 	if bodyErr != nil {
-		return -1, fmt.Errorf("Unable to read response body (%s): %v", CITY_API, bodyErr)
+		log.Fatalf("Unable to read response body (%s): %v", CITY_API, bodyErr)
 	}
 	var resp []city
 	jsonErr := json.Unmarshal(body, &resp)
 	if jsonErr != nil {
-		return -1, fmt.Errorf("Unable to unmarshal response (%s): %v\nThe json body is: %s", CITY_API, jsonErr, string(body))
+		log.Fatalf("Unable to unmarshal response (%s): %v\nThe json body is: %s", CITY_API, jsonErr, string(body))
 	}
+
+	var location model.Location
 
 	for _, city := range resp {
 		if strings.ToUpper(city.Name) == strings.ToUpper(cityName) {
-			return city.Id, nil
+			location = model.Location{
+				Id:    city.Id,
+				Name:  city.Name,
+				Coord: city.Coord,
+			}
 		}
 	}
 
-	return -1, fmt.Errorf("Unable to find city id by %s", cityName)
-
+	return location
 }
 
-func CurrentWeather(cityid int, land string) model.Weather {
+func nowWeather(cityid int, land string) model.Temperature {
 	url := fmt.Sprintf(CURRENT_API, cityid, land)
 	res, requestErr := http.Get(url)
 	if requestErr != nil {
@@ -110,10 +120,7 @@ func CurrentWeather(cityid int, land string) model.Weather {
 		log.Fatalf("Unable to unmarshal response (%s): %v\nThe json body is: %s", url, jsonErr, string(body))
 	}
 
-	var weather model.Weather
-	weather.Coord = resp.Coord
-	weather.Location = resp.Name
-	weather.Now = model.Temperature{
+	now := model.Temperature{
 		Time:         time.Unix(resp.Dt, 0),
 		WeatherCode:  resp.Weather[0].Id,
 		WeatherDesc:  resp.Weather[0].Description,
@@ -131,5 +138,52 @@ func CurrentWeather(cityid int, land string) model.Weather {
 		SnowOneHour:  resp.Snow.OneHour,
 		Cloudiness:   resp.Clouds.All,
 	}
-	return weather
+	return now
+}
+
+func forecastWeather(cityid int, land string) forecast {
+	url := fmt.Sprintf(FORECAST_API, cityid, land)
+	res, requestErr := http.Get(url)
+	if requestErr != nil {
+		log.Fatalln("Unable to get current weather")
+	}
+	defer res.Body.Close()
+	body, bodyErr := ioutil.ReadAll(res.Body)
+	if bodyErr != nil {
+		log.Fatalf("Unable to read response body (%s): %v", url, bodyErr)
+	}
+
+	var forecast forecast
+	jsonErr := json.Unmarshal(body, &forecast)
+	if jsonErr != nil {
+		log.Fatalf("Unable to unmarshal response (%s): %v\nThe json body is: %s", url, jsonErr, string(body))
+	}
+
+	return forecast
+}
+
+func Request(cityName string, land string) {
+	location := requestCityId(cityName)
+	if location.Id == 0 {
+		log.Fatalf("Unable to find city id by %s", cityName)
+	}
+
+	var weather = model.Weather{}
+	weather.Location = location
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func(wg *sync.WaitGroup) {
+		weather.Now = nowWeather(location.Id, land)
+		wg.Done()
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		forecastWeather(location.Id, land)
+		wg.Done()
+	}(&wg)
+
+	wg.Wait()
+
 }

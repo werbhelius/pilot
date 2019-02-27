@@ -12,8 +12,8 @@ type Temperature struct {
 	TempC        UnitTemp // °C
 	TempC_max    UnitTemp // °C
 	TempC_min    UnitTemp // °C
-	Pressure     int      // hpa
-	Humidity     int      //%
+	Pressure     float32  // hpa
+	Humidity     float32  //%
 	Sunrise      time.Time
 	Sunset       time.Time
 	VisibilityM  int     // m
@@ -34,11 +34,16 @@ type Coord struct {
 	Lon float32 `json:"lon"`
 }
 
+type Location struct {
+	Coord Coord
+	Id    int
+	Name  string
+}
+
 type Weather struct {
 	Now      Temperature
 	Forecast []Day
-	Location string
-	Coord    Coord
+	Location Location
 }
 
 type UnitTemp float32
