@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/werbhelius/pilot/ui"
 )
 
 func main() {
@@ -18,8 +19,6 @@ func main() {
 	flag.StringVar(lang, "l", "zh_ch", "weather desc language ")
 	flag.Parse()
 
-	//ui.Render(*city, *lang)
-
-	println("")
+	ui.Render(*city, *lang)
 
 }
