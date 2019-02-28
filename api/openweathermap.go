@@ -120,28 +120,33 @@ func nowWeather(cityid int, land string) model.Temperature {
 		log.Fatalf("Unable to unmarshal response (%s): %v\nThe json body is: %s", url, jsonErr, string(body))
 	}
 
-	now := model.Temperature{
-		Time:         time.Unix(resp.Dt, 0),
-		WeatherCode:  resp.Weather[0].Id,
-		WeatherDesc:  resp.Weather[0].Description,
-		TempC:        model.UnitTemp(resp.Main.Temp),
-		TempC_max:    model.UnitTemp(resp.Main.TempMax),
-		TempC_min:    model.UnitTemp(resp.Main.TempMin),
-		Pressure:     resp.Main.Pressure,
-		Humidity:     resp.Main.Humidity,
-		Sunrise:      time.Unix(resp.Sys.Sunrise, 0),
-		Sunset:       time.Unix(resp.Sys.Sunset, 0),
-		VisibilityM:  resp.Visibility,
-		WindspeedMps: resp.Wind.Speed,
-		WindDegDesc:  resp.Wind.Deg,
-		RainOneHour:  resp.Rain.OneHour,
-		SnowOneHour:  resp.Snow.OneHour,
-		Cloudiness:   resp.Clouds.All,
-	}
+	now := parseTemperature(resp)
+
 	return now
 }
 
-func forecastWeather(cityid int, land string) forecast {
+func parseTemperature(cweather currentWeather) model.Temperature {
+	return model.Temperature{
+		Time:         time.Unix(cweather.Dt, 0),
+		WeatherCode:  cweather.Weather[0].Id,
+		WeatherDesc:  cweather.Weather[0].Description,
+		TempC:        model.UnitTemp(cweather.Main.Temp),
+		TempC_max:    model.UnitTemp(cweather.Main.TempMax),
+		TempC_min:    model.UnitTemp(cweather.Main.TempMin),
+		Pressure:     cweather.Main.Pressure,
+		Humidity:     cweather.Main.Humidity,
+		Sunrise:      time.Unix(cweather.Sys.Sunrise, 0),
+		Sunset:       time.Unix(cweather.Sys.Sunset, 0),
+		VisibilityM:  cweather.Visibility,
+		WindspeedMps: cweather.Wind.Speed,
+		WindDegDesc:  cweather.Wind.Deg,
+		RainOneHour:  cweather.Rain.OneHour,
+		SnowOneHour:  cweather.Snow.OneHour,
+		Cloudiness:   cweather.Clouds.All,
+	}
+}
+
+func forecastWeather(cityid int, land string) []model.Day {
 	url := fmt.Sprintf(FORECAST_API, cityid, land)
 	res, requestErr := http.Get(url)
 	if requestErr != nil {
@@ -159,10 +164,28 @@ func forecastWeather(cityid int, land string) forecast {
 		log.Fatalf("Unable to unmarshal response (%s): %v\nThe json body is: %s", url, jsonErr, string(body))
 	}
 
-	return forecast
+	var dayWeather []model.Day
+	var day *model.Day
+	for _, weather := range forecast.List {
+		if day == nil {
+			day = new(model.Day)
+			day.Date = time.Unix(weather.Dt, 0)
+		}
+		if day.Date.Day() == time.Unix(weather.Dt, 0).Day() {
+			day.Weathers = append(day.Weathers, parseTemperature(weather))
+		}
+		if day.Date.Day() != time.Unix(weather.Dt, 0).Day() {
+			dayWeather = append(dayWeather, *day)
+			day = new(model.Day)
+			day.Date = time.Unix(weather.Dt, 0)
+			day.Weathers = append(day.Weathers, parseTemperature(weather))
+		}
+	}
+
+	return dayWeather
 }
 
-func Request(cityName string, land string) {
+func Request(cityName string, land string) model.Weather {
 	location := requestCityId(cityName)
 	if location.Id == 0 {
 		log.Fatalf("Unable to find city id by %s", cityName)
@@ -180,10 +203,12 @@ func Request(cityName string, land string) {
 	}(&wg)
 
 	go func(wg *sync.WaitGroup) {
-		forecastWeather(location.Id, land)
+		weather.Forecast = forecastWeather(location.Id, land)
 		wg.Done()
 	}(&wg)
 
 	wg.Wait()
+
+	return weather
 
 }
