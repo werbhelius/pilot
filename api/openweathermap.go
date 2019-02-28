@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-type CityRequest struct {
-	CityName string
-}
-
 type city struct {
 	Id      int         `json:"id"`
 	Name    string      `json:"name"`
@@ -67,25 +63,25 @@ type forecast struct {
 }
 
 const (
-	CITY_API     = "https://raw.githubusercontent.com/werbhelius/Data/master/cityIdwithCoord.json"
-	CURRENT_API  = "http://api.openweathermap.org/data/2.5/weather?id=%d&appid=57eeedbb8f9a8f7627af398802d741b0&units=metric&lang=%s"
-	FORECAST_API = "http://api.openweathermap.org/data/2.5/forecast?id=%d&appid=57eeedbb8f9a8f7627af398802d741b0&units=metric&lang=%s"
+	city_api     = "https://raw.githubusercontent.com/werbhelius/Data/master/cityIdwithCoord.json"
+	current_api  = "http://api.openweathermap.org/data/2.5/weather?id=%d&appid=57eeedbb8f9a8f7627af398802d741b0&units=metric&lang=%s"
+	forecast_api = "http://api.openweathermap.org/data/2.5/forecast?id=%d&appid=57eeedbb8f9a8f7627af398802d741b0&units=metric&lang=%s"
 )
 
 func requestCityId(cityName string) model.Location {
-	res, requestErr := http.Get(CITY_API)
+	res, requestErr := http.Get(city_api)
 	if requestErr != nil {
 		log.Fatalf("Unable to get city list")
 	}
 	defer res.Body.Close()
 	body, bodyErr := ioutil.ReadAll(res.Body)
 	if bodyErr != nil {
-		log.Fatalf("Unable to read response body (%s): %v", CITY_API, bodyErr)
+		log.Fatalf("Unable to read response body (%s): %v", city_api, bodyErr)
 	}
 	var resp []city
 	jsonErr := json.Unmarshal(body, &resp)
 	if jsonErr != nil {
-		log.Fatalf("Unable to unmarshal response (%s): %v\nThe json body is: %s", CITY_API, jsonErr, string(body))
+		log.Fatalf("Unable to unmarshal response (%s): %v\nThe json body is: %s", city_api, jsonErr, string(body))
 	}
 
 	var location model.Location
@@ -93,9 +89,10 @@ func requestCityId(cityName string) model.Location {
 	for _, city := range resp {
 		if strings.ToUpper(city.Name) == strings.ToUpper(cityName) {
 			location = model.Location{
-				Id:    city.Id,
-				Name:  city.Name,
-				Coord: city.Coord,
+				Id:      city.Id,
+				Name:    city.Name,
+				Coord:   city.Coord,
+				Country: city.Country,
 			}
 		}
 	}
@@ -104,7 +101,7 @@ func requestCityId(cityName string) model.Location {
 }
 
 func nowWeather(cityid int, land string) model.Temperature {
-	url := fmt.Sprintf(CURRENT_API, cityid, land)
+	url := fmt.Sprintf(current_api, cityid, land)
 	res, requestErr := http.Get(url)
 	if requestErr != nil {
 		log.Fatalln("Unable to get current weather")
@@ -139,7 +136,7 @@ func parseTemperature(cweather currentWeather) model.Temperature {
 		Sunset:       time.Unix(cweather.Sys.Sunset, 0),
 		VisibilityM:  cweather.Visibility,
 		WindspeedMps: cweather.Wind.Speed,
-		WindDegDesc:  cweather.Wind.Deg,
+		WindDegDesc:  model.UnitWindDeg(cweather.Wind.Deg),
 		RainOneHour:  cweather.Rain.OneHour,
 		SnowOneHour:  cweather.Snow.OneHour,
 		Cloudiness:   cweather.Clouds.All,
@@ -147,7 +144,7 @@ func parseTemperature(cweather currentWeather) model.Temperature {
 }
 
 func forecastWeather(cityid int, land string) []model.Day {
-	url := fmt.Sprintf(FORECAST_API, cityid, land)
+	url := fmt.Sprintf(forecast_api, cityid, land)
 	res, requestErr := http.Get(url)
 	if requestErr != nil {
 		log.Fatalln("Unable to get current weather")

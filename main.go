@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"github.com/werbhelius/pilot/api"
 )
 
 func main() {
@@ -13,14 +11,15 @@ func main() {
 		"city",
 		"Beijing",
 		"city must be request (you can find city name、id and coord in https://raw.githubusercontent.com/werbhelius/Data/master/cityIdwithCoord.json) ")
-
+	flag.StringVar(city, "c",
+		"Beijing",
+		"city must be request (you can find city name、id and coord in https://raw.githubusercontent.com/werbhelius/Data/master/cityIdwithCoord.json) ")
 	lang := flag.String("lang", "zh_ch", "weather desc language ")
-
+	flag.StringVar(lang, "l", "zh_ch", "weather desc language ")
 	flag.Parse()
 
-	fmt.Println(*city)
-	fmt.Println(*lang)
+	//ui.Render(*city, *lang)
 
-	api.Request(*city, *lang)
+	println("")
 
 }
