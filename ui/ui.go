@@ -79,7 +79,7 @@ func printNow(now model.Temperature) {
 	fmt.Printf("%shpa\n", green(now.Pressure))
 
 	_, _ = blue.Print("Humidity: ")
-	fmt.Printf("%s %%\n", green(now.Humidity))
+	fmt.Printf("%s%%\n", green(now.Humidity))
 
 	_, _ = blue.Print("Sunrise: ")
 	fmt.Printf("%s\n", green(now.Sunrise.Format("15:04")))
