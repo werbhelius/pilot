@@ -63,28 +63,29 @@ func printCityInfo(location model.Location) {
 	fmt.Printf("Weather in %s,%s (%f,%f)\n\n", green(location.Name), green(location.Country), location.Coord.Lat, location.Coord.Lon)
 }
 
+//noinspection GoUnhandledErrorResult
 func printNow(now model.Temperature) {
 	blue := color.New(color.FgHiBlue)
-	green := color.New(color.FgGreen).Add(color.Bold).SprintFunc()
+	green := color.New(color.FgGreen).Add(color.Bold)
 
-	_, _ = blue.Print("Current Weather: ")
-	fmt.Printf("%s %s\n", green(now.WeatherDesc), green(now.TempC.FormatTemp()))
+	blue.Print("Current Weather: ")
+	green.Printf("%s %s\n", now.WeatherDesc, now.TempC.FormatTemp())
 
-	_, _ = blue.Print("Wind: ")
-	fmt.Printf("%s %sm/s\n", green(now.WindDegDesc.FormatWindDeg()), green(now.WindspeedMps))
+	blue.Print("Wind: ")
+	green.Printf("%s %gm/s\n", now.WindDegDesc.FormatWindDeg(), now.WindspeedMps)
 
-	_, _ = blue.Print("Cloudiness: ")
+	blue.Print("Cloudiness: ")
 
-	_, _ = blue.Print("Pressure: ")
-	fmt.Printf("%shpa\n", green(now.Pressure))
+	blue.Print("Pressure: ")
+	green.Printf("%ghpa\n", now.Pressure)
 
-	_, _ = blue.Print("Humidity: ")
-	fmt.Printf("%s%%\n", green(now.Humidity))
+	blue.Print("Humidity: ")
+	green.Printf("%g%%\n", now.Humidity)
 
-	_, _ = blue.Print("Sunrise: ")
-	fmt.Printf("%s\n", green(now.Sunrise.Format("15:04")))
+	blue.Print("Sunrise: ")
+	green.Printf("%s\n", now.Sunrise.Format("15:04"))
 
-	_, _ = blue.Print("Sunset: ")
-	fmt.Printf("%s\n", green(now.Sunset.Format("15:04")))
+	blue.Print("Sunset: ")
+	green.Printf("%s\n", now.Sunset.Format("15:04"))
 
 }
