@@ -75,6 +75,7 @@ func printNow(now model.Temperature) {
 	green.Printf("%s %gm/s\n", now.WindDegDesc.FormatWindDeg(), now.WindspeedMps)
 
 	blue.Print("Cloudiness: ")
+	green.Printf("%d%%\n", now.Cloudiness)
 
 	blue.Print("Pressure: ")
 	green.Printf("%ghpa\n", now.Pressure)
