@@ -58,49 +58,49 @@ type UnitWindDeg float32
 func (uw UnitWindDeg) FormatWindDeg() string {
 	if uw >= 11.25 && uw < 33.75 {
 		// NNE
-		return "North North East"
+		return "North-northeast"
 	} else if uw >= 33.75 && uw < 56.25 {
 		// NE
-		return "North East"
+		return "North-east"
 	} else if uw >= 56.25 && uw < 78.75 {
 		// ENE
-		return "East North East"
+		return "East-northeast"
 	} else if uw >= 78.75 && uw < 101.25 {
 		// E
 		return "East"
 	} else if uw >= 101.25 && uw < 123.75 {
 		// ESE
-		return "East South East"
+		return "East-southeast"
 	} else if uw >= 123.75 && uw < 146.25 {
 		// SE
-		return "South East"
+		return "South-east"
 	} else if uw >= 146.25 && uw < 168.75 {
 		// SSE
-		return "South South East"
+		return "South-southeast"
 	} else if uw >= 168.75 && uw < 191.25 {
 		// S
 		return "South"
 	} else if uw >= 191.25 && uw < 213.75 {
 		// SSW
-		return "South South West"
+		return "South-southwest"
 	} else if uw >= 213.75 && uw < 236.25 {
 		// SW
-		return "South West"
+		return "South-west"
 	} else if uw >= 236.25 && uw < 258.75 {
 		// WSW
-		return "West South West"
+		return "West-southwest"
 	} else if uw >= 258.75 && uw < 281.25 {
 		// W
 		return "West"
 	} else if uw >= 281.25 && uw < 303.75 {
 		// WNW
-		return "West North West"
+		return "West-northwest"
 	} else if uw >= 303.75 && uw < 326.25 {
 		// NW
-		return "North West"
+		return "North-west"
 	} else if uw >= 326.25 && uw < 348.75 {
 		// NNW
-		return "North North West"
+		return "North-northwest"
 	} else {
 		// N
 		return "North"
