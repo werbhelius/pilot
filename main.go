@@ -20,5 +20,4 @@ func main() {
 	flag.Parse()
 
 	ui.Render(*city, *lang)
-
 }

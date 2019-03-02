@@ -71,7 +71,9 @@ func printNow(now model.Temperature) {
 	green := color.New(color.FgGreen).Add(color.Bold)
 
 	blue.Print("Current Weather: ")
-	green.Printf("%s %s %s\n", now.WeatherDesc, now.TempC.FormatTemp(), now.WeatherCode.FormatWeatherCode())
+	green.Printf("%s %s ", now.WeatherDesc, now.TempC.FormatTemp())
+	fmt.Print(now.WeatherCode.FormatWeatherCode())
+	fmt.Print("\n")
 
 	blue.Print("Wind: ")
 	green.Printf("%s %gm/s\n", now.WindDegDesc.FormatWindDeg(), now.WindspeedMps)
@@ -101,7 +103,9 @@ func printTodayHourWeather(day model.Day) {
 	blue.Print("Today Hourly weather: \n")
 	for _, weather := range day.Weathers {
 		blue.Printf("%s: ", weather.Time.Format("15:04"))
-		green.Printf("%s %s %s\n", weather.WeatherDesc, weather.TempC.FormatTemp(), weather.WeatherCode.FormatWeatherCode())
+		green.Printf("%s %s ", weather.WeatherDesc, weather.TempC.FormatTemp())
+		fmt.Print(weather.WeatherCode.FormatWeatherCode())
+		fmt.Print("\n")
 	}
 	blue.Print("\n")
 }
