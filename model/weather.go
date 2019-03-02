@@ -7,7 +7,7 @@ import (
 
 type Temperature struct {
 	Time         time.Time
-	WeatherCode  int
+	WeatherCode  UnitWeatherCode
 	WeatherDesc  string
 	TempC        UnitTemp // °C
 	TempC_max    UnitTemp // °C
@@ -104,5 +104,27 @@ func (uw UnitWindDeg) FormatWindDeg() string {
 	} else {
 		// N
 		return "North"
+	}
+}
+
+type UnitWeatherCode int
+
+func (uw UnitWeatherCode) FormatWeatherCode() string {
+	if uw >= 200 && uw < 300 {
+		return "⛈"
+	} else if uw >= 300 && uw < 400 {
+		return "🌦"
+	} else if uw >= 500 && uw < 600 {
+		return "🌧"
+	} else if uw >= 600 && uw < 700 {
+		return "❄️"
+	} else if uw >= 700 && uw < 800 {
+		return "🌫"
+	} else if uw == 800 {
+		return "☀️"
+	} else if uw > 800 && uw < 900 {
+		return "☁️"
+	} else {
+		return "🌝"
 	}
 }

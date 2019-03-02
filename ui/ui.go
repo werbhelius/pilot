@@ -32,6 +32,8 @@ func Render(cityName string, land string) {
 	wg.Wait()
 	printCityInfo(weather.Location)
 	printNow(weather.Now)
+	printTodayHourWeather(weather.Forecast[0])
+	printForecastWeather(weather.Forecast)
 
 }
 
@@ -69,7 +71,7 @@ func printNow(now model.Temperature) {
 	green := color.New(color.FgGreen).Add(color.Bold)
 
 	blue.Print("Current Weather: ")
-	green.Printf("%s %s\n", now.WeatherDesc, now.TempC.FormatTemp())
+	green.Printf("%s %s %s\n", now.WeatherDesc, now.TempC.FormatTemp(), now.WeatherCode.FormatWeatherCode())
 
 	blue.Print("Wind: ")
 	green.Printf("%s %gm/s\n", now.WindDegDesc.FormatWindDeg(), now.WindspeedMps)
@@ -87,6 +89,38 @@ func printNow(now model.Temperature) {
 	green.Printf("%s\n", now.Sunrise.Format("15:04"))
 
 	blue.Print("Sunset: ")
-	green.Printf("%s\n", now.Sunset.Format("15:04"))
+	green.Printf("%s\n\n", now.Sunset.Format("15:04"))
 
+}
+
+//noinspection GoUnhandledErrorResult
+func printTodayHourWeather(day model.Day) {
+	blue := color.New(color.FgHiBlue)
+	green := color.New(color.FgGreen).Add(color.Bold)
+
+	blue.Print("Today Hourly weather: \n")
+	for _, weather := range day.Weathers {
+		blue.Printf("%s: ", weather.Time.Format("15:04"))
+		green.Printf("%s %s %s\n", weather.WeatherDesc, weather.TempC.FormatTemp(), weather.WeatherCode.FormatWeatherCode())
+	}
+	blue.Print("\n")
+}
+
+//noinspection GoUnhandledErrorResult
+func printForecastWeather(forecast []model.Day) {
+	blue := color.New(color.FgHiBlue)
+	green := color.New(color.FgGreen).Add(color.Bold)
+
+	blue.Print("Forecast weather: \n")
+	for index, day := range forecast {
+		if index == 0 {
+			continue
+		}
+		blue.Printf("%s %s weather: \n", day.Date.Format("2006-01-02"), day.Date.Weekday().String())
+		for _, weather := range day.Weathers {
+			blue.Printf("%s: ", weather.Time.Format("15:04"))
+			green.Printf("%s %s %s\n", weather.WeatherDesc, weather.TempC.FormatTemp(), weather.WeatherCode.FormatWeatherCode())
+		}
+		blue.Print("\n")
+	}
 }

@@ -125,7 +125,7 @@ func nowWeather(cityid int, land string) model.Temperature {
 func parseTemperature(cweather currentWeather) model.Temperature {
 	return model.Temperature{
 		Time:         time.Unix(cweather.Dt, 0),
-		WeatherCode:  cweather.Weather[0].Id,
+		WeatherCode:  model.UnitWeatherCode(cweather.Weather[0].Id),
 		WeatherDesc:  cweather.Weather[0].Description,
 		TempC:        model.UnitTemp(cweather.Main.Temp),
 		TempC_max:    model.UnitTemp(cweather.Main.TempMax),
