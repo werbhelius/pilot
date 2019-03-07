@@ -62,7 +62,7 @@ func printLoading(done *bool) {
 
 func printCityInfo(location model.Location) {
 	green := color.New(color.FgGreen).Add(color.Bold).SprintFunc()
-	fmt.Printf("\n🌝---------------------Weather in %s,%s (%f,%f)---------------------🌝\n\n", green(location.Name), green(location.Country), location.Coord.Lat, location.Coord.Lon)
+	fmt.Printf("🌝---------------------Weather in %s,%s (%f,%f)---------------------🌝\n\n", green(location.Name), green(location.Country), location.Coord.Lat, location.Coord.Lon)
 }
 
 //noinspection GoUnhandledErrorResult
