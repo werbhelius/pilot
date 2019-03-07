@@ -1,4 +1,4 @@
-**pilot** a weather app for the terminal by GoLang.
+**pilot** a weather app for the terminal by Golang.
 
 ### Install
 ```shell
